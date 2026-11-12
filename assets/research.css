@@ -33,3 +33,5 @@
     a:focus-visible{outline:1px solid rgba(255,255,255,.5);outline-offset:4px}
     @media(max-width:700px){.mac-nav{margin:12px auto 0}.mac-links{justify-content:center;letter-spacing:.04em}.mac-links a{padding:7px 9px}main{margin-top:24px}h1{font-size:30px}}
     @media(max-width:380px){.mac-links{gap:0;font-size:11px}.mac-links a{padding:7px 8px}}
+    @media(max-width:700px){.mac-links{gap:2px;font-size:11px;letter-spacing:.04em}.mac-links a{padding:7px 7px}}
+    @media(max-width:360px){.mac-links{font-size:10px}.mac-links a{padding:7px 4px}}
