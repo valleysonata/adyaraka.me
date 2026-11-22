@@ -10,7 +10,12 @@ navigation links work without JavaScript.
 
 The homepage's featured cards are rendered from the existing `projects.html`
 cards by the same script. That page remains the project source of truth.
-The black-hole video, intro, ASCII SVG, CV and research routes are retained.
+The hero currently tries the existing ASCII portrait beside a larger title;
+the original black-hole video remains in `assets` for switching back. Original
+hero social links, CV and research routes are retained. The scroll cue hides
+below the top and returns on every trip back; it is never removed from the DOM.
+The navigation's moving highlight handles pointer hover and keyboard focus;
+portrait and highlight motion respect reduced-motion preferences.
 
 The contribution calendar uses GitHub's GraphQL `contributionCalendar` for
 `valleysonata`, including actual counts, dates and GitHub contribution levels.

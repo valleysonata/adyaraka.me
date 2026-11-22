@@ -1,3 +1,48 @@
+const nav = document.querySelector('.site-nav');
+if (nav) {
+  nav.setAttribute('data-highlight', '');
+  const highlight = nav.querySelector('.site-nav-highlight');
+  const links = [...nav.querySelectorAll(':scope > a')];
+  const active = links.find(link => link.hasAttribute('aria-current'));
+  const place = link => {
+    if (!link) { highlight.style.opacity = '0'; return; }
+    highlight.style.width = `${link.offsetWidth}px`;
+    highlight.style.height = `${link.offsetHeight}px`;
+    highlight.style.transform = `translate(${link.offsetLeft}px, ${link.offsetTop}px)`;
+    highlight.style.opacity = '1';
+  };
+  links.forEach(link => {
+    link.addEventListener('pointerenter', () => place(link));
+    link.addEventListener('focus', () => place(link));
+  });
+  nav.addEventListener('pointerleave', () => place(active));
+  nav.addEventListener('focusout', event => {
+    if (!nav.contains(event.relatedTarget)) place(active);
+  });
+  new ResizeObserver(() => place(active)).observe(nav);
+  document.fonts.ready.then(() => place(active));
+}
+
+// Never remove the scroll cue: it returns every time the viewport returns home.
+const scrollHint = document.getElementById('scroll-hint');
+if (scrollHint) {
+  const updateHint = () => {
+    const atTop = scrollY <= 24;
+    scrollHint.classList.toggle('hidden', !atTop);
+    scrollHint.tabIndex = atTop ? 0 : -1;
+    scrollHint.setAttribute('aria-hidden', String(!atTop));
+  };
+  scrollHint.addEventListener('click', () => {
+    document.querySelector('.status').scrollIntoView({
+      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+      block: 'start'
+    });
+  });
+  addEventListener('scroll', updateHint, {passive: true});
+  addEventListener('pageshow', updateHint);
+  updateHint();
+}
+
 // Native details keeps social links usable even without JavaScript.
 const more = document.querySelector('.site-more');
 if (more) {

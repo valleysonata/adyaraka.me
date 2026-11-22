@@ -52,9 +52,13 @@ def check(base_url=None):
         assert '<nav class="mac-nav' not in source
     home = read('index.html')
     assert 'open.spotify.com' not in home and 'np-embed' not in home
-    assert '<h2 class="bio-header">Hi!</h2>' in home
+    assert '<h2 class="bio-header">A little about me.</h2>' in home
     assert 'assets/ascii-art.svg' in home
-    assert 'assets/BH_Accretion_Disk_Sim_360_1080.webm' in home
+    assert 'class="hero-portrait"' in home
+    assert 'class="hero-socials"' in home
+    assert (ROOT/'assets/BH_Accretion_Disk_Sim_360_1080.webm').is_file()
+    assert "hint.remove()" not in home
+    assert 'class="github-profile"' in home
     assert 'Computer Science @ NYCU' in home
     assert home.index('bio-header') < home.index('id="github-title"') < home.index('id="featured-title"') < home.index('<footer')
     assert featured_projects() in home
