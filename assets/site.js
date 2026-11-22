@@ -28,10 +28,33 @@ if (portraitControl) {
   const originals = lines.map(line => line.textContent);
   const glyphs = '@%#*+=:.-';
   let frame = 0;
+  let hoverFrame = 0;
+  let pointer = null;
+  let characters = [];
+  const resetText = () => {
+    lines.forEach((line, index) => { line.textContent = originals[index]; });
+  };
+  const stopHover = () => {
+    cancelAnimationFrame(hoverFrame);
+    hoverFrame = 0;
+    pointer = null;
+    if (!frame) resetText();
+  };
+  // Measure the original glyphs once; screen-to-SVG conversion keeps the radius
+  // aligned with the cursor at every responsive size and during portrait drift.
+  const measureCharacters = () => {
+    if (frame || hoverFrame) return;
+    characters = lines.map((line, row) => [...originals[row]].map((character, column) => {
+      if (!character.trim()) return null;
+      const box = line.getExtentOfChar(column);
+      return {x: box.x + box.width / 2, y: box.y + box.height / 2};
+    }));
+  };
   const restore = () => {
     cancelAnimationFrame(frame);
     frame = 0;
-    lines.forEach((line, index) => { line.textContent = originals[index]; });
+    stopHover();
+    resetText();
     portrait.classList.remove('is-playing');
   };
   const scramble = (clicked = false) => {
@@ -56,11 +79,35 @@ if (portraitControl) {
     };
     tick(start);
   };
-  portraitControl.addEventListener('pointerenter', event => {
-    if (event.pointerType !== 'touch') scramble();
+  const hover = now => {
+    if (!pointer || frame || reduceMotion.matches) { stopHover(); return; }
+    const matrix = portrait.getScreenCTM();
+    if (!matrix) { stopHover(); return; }
+    const cursor = new DOMPoint(pointer.x, pointer.y).matrixTransform(matrix.inverse());
+    const radius = 32;
+    lines.forEach((line, row) => {
+      line.textContent = [...originals[row]].map((character, column) => {
+        const position = characters[row]?.[column];
+        if (!position) return character;
+        const distance = Math.hypot(position.x - cursor.x, position.y - cursor.y);
+        if (distance >= radius) return character;
+        const strength = 1 - distance / radius;
+        const phase = Math.floor(now / 60) + row * 7 + column * 13;
+        return phase % 10 < Math.ceil(strength * 10) ? glyphs[phase % glyphs.length] : character;
+      }).join('');
+    });
+    hoverFrame = requestAnimationFrame(hover);
+  };
+  portraitControl.addEventListener('pointermove', event => {
+    if (event.pointerType === 'touch' || frame || reduceMotion.matches) return;
+    if (!characters.length) measureCharacters();
+    pointer = {x: event.clientX, y: event.clientY};
+    if (!hoverFrame) hover(performance.now());
   });
-  portraitControl.addEventListener('focus', () => scramble());
+  portraitControl.addEventListener('pointerleave', stopHover);
   portraitControl.addEventListener('click', () => scramble(true));
+  document.fonts.ready.then(measureCharacters);
+  addEventListener('resize', () => { stopHover(); measureCharacters(); }, {passive: true});
   addEventListener('pagehide', restore);
   reduceMotion.addEventListener('change', restore);
 }

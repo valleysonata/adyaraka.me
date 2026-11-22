@@ -116,4 +116,4 @@ These pages follow [Google Scholar's inclusion guidelines](https://scholar.googl
 
 After deployment, the domain owner can submit `https://adyaraka.me/sitemap.xml` in Google Search Console and request indexing for both research HTML URLs. Search Console helps regular Google Search; it does not guarantee or directly submit a paper to Scholar.
 
-The hero portrait uses the original ASCII text, inlined by `sync_layout.py`. Hover or focus briefly scrambles characters; click or keyboard activation adds a short motion. Both restore the original text and respect reduced motion.
+The hero portrait uses the original ASCII text, inlined by `sync_layout.py`. Moving the cursor over it distorts characters only within a small radius of the pointer; leaving restores the text. Click or keyboard activation keeps the full portrait scramble and short motion. Both respect reduced motion.
