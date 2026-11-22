@@ -3,6 +3,7 @@
 Output is committed HTML: Pages does not need a framework or JavaScript to serve it.
 """
 import calendar
+import hashlib
 import html
 import json
 import re
@@ -55,7 +56,7 @@ def github_activity():
     cells[-1] = cells[-1].replace('tabindex="-1"', 'tabindex="0"')
     updated = date.fromisoformat(data['updated_at'][:10])
     return f'''<section class="home-section" aria-labelledby="github-title">
-  <div class="home-section-heading"><h2 id="github-title">GitHub</h2><a class="github-profile" href="https://github.com/valleysonata" target="_blank" rel="noreferrer" aria-label="valleysonata on GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3 .7-3.8-1.4-3.8-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.1.1 1.7 1.2 1.7 1.2 1 1.7 2.7 1.2 3.4.9.1-.7.4-1.2.7-1.5-2.5-.3-5.2-1.3-5.2-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.5.2 2.7.1 3 .8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.2 5.7.4.4.8 1 .8 2.1v3.1c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5Z"/></svg><span>valleysonata</span><svg class="external-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a></div>
+  <div class="home-section-heading"><h2 id="github-title">GitHub</h2><a class="github-profile" href="https://github.com/valleysonata" target="_blank" rel="noreferrer" aria-label="valleysonata on GitHub"><svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3 .7-3.8-1.4-3.8-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.1.1 1.7 1.2 1.7 1.2 1 1.7 2.7 1.2 3.4.9.1-.7.4-1.2.7-1.5-2.5-.3-5.2-1.3-5.2-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.5.2 2.7.1 3 .8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.2 5.7.4.4.8 1 .8 2.1v3.1c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5Z"/></svg><span>valleysonata</span><svg width="14" height="14" class="external-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a></div>
   <div class="github-card">
     <p class="github-count"><strong>{data['totalContributions']:,}</strong> contributions in the last year</p>
     <div class="github-scroll" role="region" aria-label="GitHub contribution calendar; scroll horizontally on small screens" tabindex="0">
@@ -71,6 +72,8 @@ def github_activity():
 
 def sync():
     template = (ROOT/'templates/header.html').read_text(encoding='utf-8').strip()
+    versions = {name: hashlib.sha256((ROOT/'assets'/name).read_bytes().replace(b'\r\n', b'\n')).hexdigest()[:12]
+                for name in ('site.css', 'site.js')}
     for name in PAGES:
         path = ROOT/name
         source = path.read_text(encoding='utf-8')
@@ -90,6 +93,11 @@ def sync():
             source = source.replace('<body>', '<body>\n'+header, 1)
         if '/assets/site.css' not in source:
             source = source.replace('</head>', '  <link rel="stylesheet" href="/assets/site.css">\n  <script src="/assets/site.js" defer></script>\n</head>')
+        # New markup must never load a previous deployment's CSS or JavaScript.
+        # Normalize LF before hashing so Windows and Actions generate the same URL.
+        for asset, version in versions.items():
+            source = re.sub(r'(/assets/'+re.escape(asset)+r')(?:\?v=[a-f0-9]+)?(?=")',
+                            lambda m: m[1]+'?v='+version, source)
         if name == 'index.html':
             source = source.replace('<body>', '<body class="home-page">', 1)
             source = re.sub(r'\s*<nav class="hero-links".*?</nav>', '', source, flags=re.S)

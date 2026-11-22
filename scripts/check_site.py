@@ -1,5 +1,6 @@
 """Check shared navigation, homepage preservation and generated real-data integrity."""
 import argparse
+import hashlib
 import json
 import urllib.request
 from html.parser import HTMLParser
@@ -26,7 +27,7 @@ class Page(HTMLParser):
         for attribute in ('src', 'href'):
             value = attrs.get(attribute, '')
             if value.startswith('/assets/'):
-                assert (ROOT/value.lstrip('/')).is_file(), value
+                assert (ROOT/value.split('?')[0].lstrip('/')).is_file(), value
 
 
 def check(base_url=None):
@@ -49,6 +50,9 @@ def check(base_url=None):
         assert all(link in page.links for link in ['/', '/about', '/projects', '/research/', '/news', *social]), name
         assert source.count('/assets/site.css') == 1
         assert source.count('/assets/site.js') == 1
+        for asset in ('site.css', 'site.js'):
+            digest = hashlib.sha256((ROOT/'assets'/asset).read_bytes().replace(b'\r\n', b'\n')).hexdigest()[:12]
+            assert f'/assets/{asset}?v={digest}' in source, f'{name}: unversioned or mismatched {asset}'
         assert '<nav class="mac-nav' not in source
     home = read('index.html')
     assert 'open.spotify.com' not in home and 'np-embed' not in home
@@ -56,6 +60,8 @@ def check(base_url=None):
     assert 'assets/ascii-art.svg' in home
     assert 'class="hero-portrait"' in home
     assert 'class="hero-socials"' in home
+    icons = home.split('<nav class="hero-socials"')[1].split('</nav>')[0]
+    assert icons.count('width="18" height="18"') == 4, 'SVG fallback sizes missing'
     assert (ROOT/'assets/BH_Accretion_Disk_Sim_360_1080.webm').is_file()
     assert "hint.remove()" not in home
     assert 'class="github-profile"' in home
