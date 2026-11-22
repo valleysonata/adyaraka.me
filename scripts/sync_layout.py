@@ -104,6 +104,12 @@ def sync():
                             lambda m: m[1]+'?v='+version, source)
         if name == 'index.html':
             source = source.replace('<body>', '<body class="home-page">', 1)
+            # Inline the original characters so interactions can edit real text.
+            art = (ROOT/'assets/ascii-art.svg').read_text(encoding='utf-8')
+            characters = re.search(r'<text\b.*?</text>', art, re.S)[0]
+            source = re.sub(r'(<g id="portrait-characters"[^>]*>).*?</g>',
+                            lambda m: m[1]+characters+'</g>', source, flags=re.S)
+
             source = re.sub(r'\s*<nav class="hero-links".*?</nav>', '', source, flags=re.S)
             source = re.sub(r'\s*<div class="np-embed-wrap">.*?</div>', '', source, flags=re.S)
             source = re.sub(r'\s*\.np-embed[^\n]*', '', source)

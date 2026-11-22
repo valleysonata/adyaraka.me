@@ -21,6 +21,50 @@ reduceMotion.addEventListener('change', event => {
   if (event.matches) document.documentElement.classList.remove('motion-ready');
 });
 
+const portraitControl = document.querySelector('.portrait-control');
+if (portraitControl) {
+  const portrait = portraitControl.querySelector('.hero-portrait');
+  const lines = [...portrait.querySelectorAll('tspan')];
+  const originals = lines.map(line => line.textContent);
+  const glyphs = '@%#*+=:.-';
+  let frame = 0;
+  const restore = () => {
+    cancelAnimationFrame(frame);
+    frame = 0;
+    lines.forEach((line, index) => { line.textContent = originals[index]; });
+    portrait.classList.remove('is-playing');
+  };
+  const scramble = (clicked = false) => {
+    if (reduceMotion.matches || (!clicked && frame)) return;
+    restore();
+    if (clicked) portrait.classList.add('is-playing');
+    const start = performance.now();
+    const duration = clicked ? 850 : 520;
+    let lastUpdate = -50;
+    const tick = now => {
+      const elapsed = now - start;
+      if (elapsed >= duration) { restore(); return; }
+      if (elapsed - lastUpdate >= 45) {
+        const chance = .45 * (1 - elapsed / duration);
+        lines.forEach((line, index) => {
+          line.textContent = originals[index].replace(/\S/g, character =>
+            Math.random() < chance ? glyphs[Math.floor(Math.random() * glyphs.length)] : character);
+        });
+        lastUpdate = elapsed;
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    tick(start);
+  };
+  portraitControl.addEventListener('pointerenter', event => {
+    if (event.pointerType !== 'touch') scramble();
+  });
+  portraitControl.addEventListener('focus', () => scramble());
+  portraitControl.addEventListener('click', () => scramble(true));
+  addEventListener('pagehide', restore);
+  reduceMotion.addEventListener('change', restore);
+}
+
 const nav = document.querySelector('.site-nav');
 if (nav) {
   nav.setAttribute('data-highlight', '');

@@ -29,7 +29,7 @@ without JavaScript, and reduced-motion preferences disable these transitions.
 
 The introduction's `assets/retro-computer.gif` is the unchanged artwork requested
 by the site owner: [Retro Computer Pixel Art by EiskalterEngel18](https://www.deviantart.com/eiskalterengel18/art/Retro-Computer-Pixel-Art-940766104).
-Its creator is credited beside the image. The artwork remains copyright its
+Artist attribution is retained here in the repository. The artwork remains copyright its
 creator; no open-source license for that artwork is claimed.
 
 The contribution calendar uses GitHub's GraphQL `contributionCalendar` for
@@ -115,3 +115,5 @@ The HTTP check verifies unauthenticated 200 responses, HTML/PDF content types, a
 These pages follow [Google Scholar's inclusion guidelines](https://scholar.google.com/intl/en/scholar/inclusion.html), including one abstract per HTML page, individual author tags, a same-directory `citation_pdf_url`, and simple HTML discovery links. Indexing and timing remain Google's decision. Scholar may group this copy with the publisher version rather than show it separately.
 
 After deployment, the domain owner can submit `https://adyaraka.me/sitemap.xml` in Google Search Console and request indexing for both research HTML URLs. Search Console helps regular Google Search; it does not guarantee or directly submit a paper to Scholar.
+
+The hero portrait uses the original ASCII text, inlined by `sync_layout.py`. Hover or focus briefly scrambles characters; click or keyboard activation adds a short motion. Both restore the original text and respect reduced motion.
