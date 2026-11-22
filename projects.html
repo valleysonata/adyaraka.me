@@ -7,7 +7,7 @@
   <meta name="description" content="Projects — Adyaraka Banyu Langit">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#030303">
-  <link rel="icon" href="assets/favicon.png">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=8afd97e9f0f1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -40,8 +40,8 @@
     }
     a:focus-visible{outline:1px solid rgba(255,255,255,0.5);outline-offset:3px}
 </style>
-  <link rel="stylesheet" href="/assets/site.css?v=254d3f14a877">
-  <script src="/assets/site.js?v=3979e5ae4330" defer></script>
+  <link rel="stylesheet" href="/assets/site.css?v=48202657255f">
+  <script src="/assets/site.js?v=e79d38b6eebb" defer></script>
 </head>
 <body>
 <!-- site-header:start -->
@@ -109,11 +109,6 @@
   <script>
     const yearEl = document.getElementById('year');
     if(yearEl) yearEl.textContent = new Date().getFullYear();
-    const reveals = document.querySelectorAll('.reveal');
-    if(reveals[0]) reveals[0].style.transitionDelay = '0ms';
-    requestAnimationFrame(()=> reveals[0]?.classList.add('in'));
-    const obs = new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}})}, {threshold:0.06,rootMargin:'0px 0px 0px 0px'});
-    reveals.forEach((el,i)=>{ if(i===0) return; el.style.transitionDelay=`${Math.min(i*70,220)}ms`; obs.observe(el); });
   </script>
 </body>
 </html>

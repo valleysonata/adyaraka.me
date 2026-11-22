@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 import urllib.request
+import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 from pathlib import Path
 from sync_layout import PAGES, featured_projects
@@ -61,7 +62,13 @@ def check(base_url=None):
     assert 'class="hero-portrait"' in home
     assert 'class="hero-socials"' in home
     icons = home.split('<nav class="hero-socials"')[1].split('</nav>')[0]
-    assert icons.count('width="18" height="18"') == 4, 'SVG fallback sizes missing'
+    assert icons.count('width="22" height="22"') == 4, 'SVG fallback sizes missing'
+    assert 'assets/favicon.svg?v=' in home
+    favicon = ET.fromstring(read('assets/favicon.svg'))
+    embedded = favicon.find('{http://www.w3.org/2000/svg}image')
+    assert embedded is not None and embedded.get('href').startswith('data:image/')
+    assert 'assets/retro-computer.gif' in home
+    assert (ROOT/'assets/retro-computer.gif').read_bytes().startswith((b'GIF87a', b'GIF89a'))
     assert (ROOT/'assets/BH_Accretion_Disk_Sim_360_1080.webm').is_file()
     assert "hint.remove()" not in home
     assert 'class="github-profile"' in home

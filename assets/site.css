@@ -33,10 +33,14 @@ body:not(.home-page)>.wrap{padding-top:110px!important}
 .hero-socials{display:flex;gap:10px;margin-top:26px}
 .hero-socials a{display:grid;place-items:center;width:44px;height:44px;border:1px solid #ffffff12;border-radius:12px;background:#ffffff06;color:#ccc;transition:background .18s,border-color .18s,transform .18s}
 .hero-socials a:hover{background:#ffffff12;border-color:#ffffff26;transform:translateY(-2px);color:#fff}
-.hero-socials svg{display:block;width:18px;height:18px;fill:currentColor}
+.hero-socials svg{display:block;width:22px;height:22px;fill:currentColor}
 .home-page .scroll-hint{display:flex;bottom:24px}
 .home-page .hero-rule{border-color:#222}
-.home-page .status-grid{display:block}
+.home-page .status-grid{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:48px;align-items:center}
+.about-computer{margin:0;text-align:center}
+.about-computer img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:contain;image-rendering:pixelated}
+.about-computer figcaption{margin-top:5px;font-size:10px;color:#777;line-height:1.5}
+.about-computer figcaption a:hover{color:#ddd}
 .home-page .bio-header{font-size:32px;font-weight:500;letter-spacing:-.04em}
 .home-page .prose{color:#aaa;font-size:16px}
 .home-page .ascii-art-img{max-height:240px;object-fit:contain}
@@ -91,3 +95,21 @@ body:not(.home-page)>.wrap{padding-top:110px!important}
 }
 @media(max-width:380px){.site-header{left:10px;right:10px;gap:5px}.site-logo{font-size:17px}.site-nav{font-size:11px;padding:3px}.site-nav>a{padding:7px 3px}.site-more>summary{width:25px;height:25px}}
 @media(prefers-reduced-motion:reduce){.featured-project,.site-nav>a,.site-menu a,.site-nav-highlight,.hero-socials a{transition:none}.featured-project:hover{transform:none}.hero-portrait{animation:none}}
+
+/* Progressive enhancement: regular links remain native across all browsers. */
+@view-transition{navigation:auto}
+.site-header{view-transition-name:site-header}
+::view-transition-old(root){animation:page-fade-out .16s ease both}
+::view-transition-new(root){animation:page-fade-in .22s ease both}
+::view-transition-group(site-header){animation-duration:.22s}
+@keyframes page-fade-out{to{opacity:0}}
+@keyframes page-fade-in{from{opacity:0}to{opacity:1}}
+.reveal{opacity:1;transform:none;translate:0 0;transition:opacity .7s ease var(--reveal-delay,0ms),translate .7s cubic-bezier(.2,.7,.2,1) var(--reveal-delay,0ms),border-color .18s,transform .18s}
+.motion-ready .reveal:not(.in){opacity:0;translate:0 14px}
+.motion-ready .hero.reveal{translate:0 0}
+@media(max-width:760px){.home-page .status-grid{grid-template-columns:1fr;gap:24px}.about-computer{width:210px;justify-self:center}}
+@media(prefers-reduced-motion:reduce){
+ @view-transition{navigation:none}
+ .reveal,.motion-ready .reveal:not(.in){opacity:1;translate:none;transform:none;transition:none}
+ ::view-transition-old(root),::view-transition-new(root),::view-transition-group(site-header){animation:none}
+}

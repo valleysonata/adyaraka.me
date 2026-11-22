@@ -31,7 +31,7 @@ def featured_projects():
         title = plain(re.search(r'<h3\b[^>]*>(.*?)<span', card, re.S)[1])
         description = plain(re.search(r'<p class="card-desc"[^>]*>(.*?)</p>', card, re.S)[1])
         tags = re.search(r'<div class="card-tags">(.*?)</div>', card, re.S)[1]
-        output.append(f'''<a class="featured-project" href="{html.escape(href)}" target="_blank" rel="noreferrer">
+        output.append(f'''<a class="featured-project reveal" href="{html.escape(href)}" target="_blank" rel="noreferrer">
   <img src="/{image}" alt="{html.escape(alt)}" loading="lazy" width="480" height="260">
   <div class="featured-project-body"><h3>{html.escape(title)}</h3><p>{html.escape(description)}</p><div class="featured-tags">{tags}</div></div>
 </a>''')
@@ -55,7 +55,7 @@ def github_activity():
             cells.append(f'<button class="gh-day" type="button" tabindex="-1" data-level="{level}" data-date="{parsed}" data-count="{count}" aria-label="{label}" style="grid-column:{column};grid-row:{day["weekday"] + 1}"></button>')
     cells[-1] = cells[-1].replace('tabindex="-1"', 'tabindex="0"')
     updated = date.fromisoformat(data['updated_at'][:10])
-    return f'''<section class="home-section" aria-labelledby="github-title">
+    return f'''<section class="home-section reveal" aria-labelledby="github-title">
   <div class="home-section-heading"><h2 id="github-title">GitHub</h2><a class="github-profile" href="https://github.com/valleysonata" target="_blank" rel="noreferrer" aria-label="valleysonata on GitHub"><svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3 .7-3.8-1.4-3.8-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.1.1 1.7 1.2 1.7 1.2 1 1.7 2.7 1.2 3.4.9.1-.7.4-1.2.7-1.5-2.5-.3-5.2-1.3-5.2-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.5.2 2.7.1 3 .8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.2 5.7.4.4.8 1 .8 2.1v3.1c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5Z"/></svg><span>valleysonata</span><svg width="14" height="14" class="external-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a></div>
   <div class="github-card">
     <p class="github-count"><strong>{data['totalContributions']:,}</strong> contributions in the last year</p>
@@ -77,6 +77,10 @@ def sync():
     for name in PAGES:
         path = ROOT/name
         source = path.read_text(encoding='utf-8')
+        # One shared observer controls reveals; retain each page's other scripts.
+        source = re.sub(r'    const reveals = document.querySelectorAll\(\'.reveal\'\);.*?(?=  </script>)', '', source, flags=re.S)
+        favicon_version = hashlib.sha256((ROOT/'assets/favicon.svg').read_bytes()).hexdigest()[:12]
+        source = re.sub(r'<link rel="icon"[^>]*>', f'<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v={favicon_version}">', source)
         # Retire the old nav-only CSS without disturbing page content styles.
         source = re.sub(r'<style>(.*?)</style>', lambda m: '<style>'+clean_css(m[1])+'</style>', source, flags=re.S)
         # Remove the previous in-content nav and its now-unused hover script.
@@ -105,7 +109,7 @@ def sync():
             source = re.sub(r'\s*\.np-embed[^\n]*', '', source)
             section = '<!-- home-work:start -->\n' + github_activity() + f'''
 <section class="home-section" aria-labelledby="featured-title">
-  <div class="home-section-heading"><h2 id="featured-title">Featured Projects</h2><a href="/projects">View all projects</a></div>
+  <div class="home-section-heading reveal"><h2 id="featured-title">Featured Projects</h2><a href="/projects">View all projects</a></div>
   <div class="featured-grid">{featured_projects()}</div>
 </section>
 <!-- home-work:end -->'''

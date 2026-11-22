@@ -1,3 +1,26 @@
+// Content is visible by default, including without JavaScript or on API failure.
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const reveals = [...document.querySelectorAll('.reveal')];
+if (!reduceMotion.matches && 'IntersectionObserver' in window) {
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('in');
+      observer.unobserve(entry.target);
+    });
+  }, {threshold: 0.08, rootMargin: '0px 0px -24px 0px'});
+  document.documentElement.classList.add('motion-ready');
+  document.querySelectorAll('.featured-project').forEach((card, index) => {
+    card.style.setProperty('--reveal-delay', `${index * 70}ms`);
+  });
+  reveals.forEach(element => observer.observe(element));
+  // A tall hero must remain visible even if it exceeds the viewport.
+  document.querySelector('.hero')?.classList.add('in');
+}
+reduceMotion.addEventListener('change', event => {
+  if (event.matches) document.documentElement.classList.remove('motion-ready');
+});
+
 const nav = document.querySelector('.site-nav');
 if (nav) {
   nav.setAttribute('data-highlight', '');
