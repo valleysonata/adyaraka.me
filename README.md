@@ -1,5 +1,41 @@
 # adyaraka.me
 
+## Layout and GitHub activity
+
+The existing static site now shares a fixed header across all six content pages.
+Edit `templates/header.html`, then run `python scripts/sync_layout.py` to update
+the committed HTML. Shared styles and dropdown/calendar behavior are in
+`assets/site.css` and `assets/site.js`. The native social dropdown and all
+navigation links work without JavaScript.
+
+The homepage's featured cards are rendered from the existing `projects.html`
+cards by the same script. That page remains the project source of truth.
+The black-hole video, intro, ASCII SVG, CV and research routes are retained.
+
+The contribution calendar uses GitHub's GraphQL `contributionCalendar` for
+`valleysonata`, including actual counts, dates and GitHub contribution levels.
+The last successful response is stored in `assets/github-contributions.json`;
+its date is displayed on the page. No credentials are shipped to visitors and
+no third-party calendar service is required. Failed refreshes leave the dated
+snapshot intact. Counts follow GitHub's contribution attribution and visibility
+rules and can differ from raw commit counts.
+
+To refresh locally with an authenticated GitHub CLI:
+
+```sh
+python scripts/refresh_github.py
+python scripts/check_site.py
+python scripts/check_research.py
+node --check assets/site.js
+```
+
+`.github/workflows/refresh-contributions.yml` runs daily at 06:17 UTC and can be
+run manually. It uses the repository's built-in Actions token, validates the
+HTML, commits the refreshed snapshot and requests a build of the existing
+branch-based GitHub Pages site. No framework or hosting migration is needed.
+GitHub can delay scheduled runs or disable schedules on inactive repositories;
+the visible update date makes stale data identifiable.
+
 Personal website, served by GitHub Pages from `main` at `/`, with the custom domain in `CNAME` and HTTPS enforced. The site uses hand-written HTML, inline CSS and vanilla JavaScript; it has no framework, client-side router, package dependencies, or build/test command. GitHub Pages serves extensionless routes from `.html` files.
 
 ## Research

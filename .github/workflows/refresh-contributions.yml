@@ -1,0 +1,37 @@
+name: Refresh GitHub activity
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: github-activity
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Refresh and check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/refresh_github.py
+          python scripts/check_research.py
+          python scripts/check_site.py
+      - name: Save activity and rebuild existing Pages site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/github-contributions.json index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Update GitHub activity'
+          git push
+          gh api --method POST "repos/${{ github.repository }}/pages/builds"

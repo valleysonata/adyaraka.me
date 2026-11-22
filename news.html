@@ -18,12 +18,6 @@
     a{color:inherit;text-decoration:none} ::selection{background:rgba(255,255,255,0.14)}
     .wrap{max-width:1080px;margin:0 auto;padding:0 32px;position:relative}
     @media(max-width:1100px){.wrap{max-width:960px}} @media(max-width:860px){.wrap{max-width:720px}} @media(max-width:640px){.wrap{padding:0 20px}}
-    .mac-nav{margin-top:36px;display:flex;align-items:center;gap:0;padding:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 8px 28px rgba(0,0,0,0.28);max-width:fit-content;position:relative;isolation:isolate}
-    .mac-links{display:flex;flex-wrap:wrap;gap:4px;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);position:relative;z-index:1}
-    .mac-links a{padding:7px 12px;border-radius:10px;transition:color .2s ease;white-space:nowrap;position:relative;z-index:1}
-    .mac-links a:hover{color:var(--text)} .mac-links a[aria-current="page"]{color:var(--text)}
-    .mac-highlight{position:absolute;top:6px;bottom:6px;left:0;width:0;background:rgba(255,255,255,0.08);border-radius:10px;pointer-events:none;opacity:0;transform:translateX(0);transition:transform .48s cubic-bezier(.16,1,.3,1),width .48s cubic-bezier(.16,1,.3,1),opacity .25s ease;transition-delay:0.06s;z-index:0}
-    .mac-nav:hover .mac-highlight{opacity:1}
     section{padding:32px 0 0} .section-title{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
     footer{margin-top:10px;padding:24px 0 44px;border-top:none;display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-between;font-size:11.5px;color:var(--muted);font-family:'Inter',sans-serif;font-weight:400}
     .reveal{opacity:0;transform:translateY(18px);transition:opacity .65s ease,transform .65s cubic-bezier(.16,1,.3,1)}
@@ -31,24 +25,35 @@
     @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
     @media(max-width:700px){
       .wrap{display:flex; flex-direction:column; padding-top:0 !important}
-      .mac-nav{order:-1; margin:12px auto 0; position:sticky; top:12px; z-index:50; max-width:fit-content}
-      .mac-links{display:flex; flex-direction:row}
       footer{justify-content:center; text-align:center}
     }
     a:focus-visible{outline:1px solid rgba(255,255,255,0.5);outline-offset:3px}
-  </style>
+</style>
+  <link rel="stylesheet" href="/assets/site.css">
+  <script src="/assets/site.js" defer></script>
 </head>
 <body>
-  <div class="wrap" style="padding-top:28px">
-    <nav class="mac-nav reveal" aria-label="Primary">
-      <div class="mac-highlight" id="mac-highlight" aria-hidden="true"></div>
-      <div class="mac-links" id="mac-links">
-        <a href="/">Home</a>
-        <a href="projects">Projects</a>
-        <a href="about">About</a>
-        <a href="news" aria-current="page">News</a>
+<!-- site-header:start -->
+<header class="site-header">
+  <a class="site-logo" href="/" aria-label="adyaraka. Home">adyaraka.</a>
+  <nav class="site-nav" aria-label="Primary">
+    <a href="/about">About</a>
+    <a href="/projects">Projects</a>
+    <a href="/research/">Research</a>
+    <a href="/news" aria-current="page">News</a>
+    <details class="site-more">
+      <summary aria-label="Social links"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></summary>
+      <div class="site-menu">
+        <a href="https://github.com/valleysonata" target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3 .7-3.8-1.4-3.8-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.1.1 1.7 1.2 1.7 1.2 1 1.7 2.7 1.2 3.4.9.1-.7.4-1.2.7-1.5-2.5-.3-5.2-1.3-5.2-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.5.2 2.7.1 3 .8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.2 5.7.4.4.8 1 .8 2.1v3.1c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5Z"/></svg>GitHub</a>
+        <a href="https://www.linkedin.com/in/adyaraka-banyu-langit-63456a317/" target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8H1v15h4V8ZM3 1a2.4 2.4 0 1 0 0 4.8A2.4 2.4 0 0 0 3 1ZM23 14c0-4-2-6.2-5-6.2-2 0-3.1 1-3.6 2V8H10v15h4.4v-8c0-2.1.4-3.4 2.3-3.4s2 1.5 2 3.5V23H23v-9Z"/></svg>LinkedIn</a>
+        <a href="https://www.researchgate.net/profile/Adyaraka-Banyu-Langit" target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><text x="1" y="18" font-size="17" font-family="Georgia,serif">R</text><text x="14" y="10" font-size="10" font-family="Georgia,serif">G</text></svg>ResearchGate</a>
+        <a href="mailto:adyaraka.cs15@nycu.edu.tw"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="3" fill="none"/><path d="m3 6 9 7 9-7" fill="none"/></svg>Email</a>
       </div>
-    </nav>
+    </details>
+  </nav>
+</header>
+<!-- site-header:end -->
+  <div class="wrap" style="padding-top:28px">
     <section class="reveal" aria-labelledby="news-title" style="padding-top:32px">
       <h2 class="section-title" id="news-title">News</h2>
     </section>
@@ -64,8 +69,6 @@
     requestAnimationFrame(()=> reveals[0]?.classList.add('in'));
     const obs = new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}})}, {threshold:0.06,rootMargin:'0px 0px 0px 0px'});
     reveals.forEach((el,i)=>{ if(i===0) return; el.style.transitionDelay=`${Math.min(i*70,220)}ms`; obs.observe(el); });
-    const hl=document.getElementById('mac-highlight'); const ml=document.getElementById('mac-links');
-    if(hl&&ml){const links=ml.querySelectorAll('a'); const active=ml.querySelector('a[aria-current="page"]'); const nav=hl.parentElement; const place=(el)=>{if(!el||!nav)return; const nr=nav.getBoundingClientRect(); const r=el.getBoundingClientRect(); hl.style.width=r.width+'px'; hl.style.transform=`translateX(${r.left-nr.left}px)`; hl.style.opacity='1';}; if(active) requestAnimationFrame(()=>place(active)); links.forEach(a=>a.addEventListener('mouseenter',()=>place(a))); nav.addEventListener('mouseleave',()=>{const cur=ml.querySelector('a[aria-current="page"]'); if(cur) place(cur); else hl.style.opacity='0';}); window.addEventListener('resize',()=>{const cur=ml.querySelector('a[aria-current="page"]'); if(cur) place(cur);});}
   </script>
 </body>
 </html>
