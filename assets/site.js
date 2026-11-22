@@ -27,11 +27,13 @@ if (portraitControl) {
   const lines = [...portrait.querySelectorAll('tspan')];
   const originals = lines.map(line => line.textContent);
   const glyphs = '@%#*+=:.-';
+  const desktopPortrait = matchMedia('(min-width: 701px)');
   let frame = 0;
   let pointer = null;
   let characters = [];
   let visible = true;
   let clickStart = -Infinity;
+  let lastUpdate = -Infinity;
   const resetText = () => {
     lines.forEach((line, row) => { line.textContent = originals[row]; });
   };
@@ -48,7 +50,12 @@ if (portraitControl) {
     resetText();
   };
   const tick = now => {
-    // Fresh noise on every display frame, with the original silhouette intact.
+    // Keep mobile's frame-rate noise; hold desktop symbols long enough to read.
+    if (desktopPortrait.matches && now - lastUpdate < 75) {
+      frame = requestAnimationFrame(tick);
+      return;
+    }
+    lastUpdate = now;
     const baseChance = now - clickStart < 120 ? .75 : .5;
     const matrix = pointer && portrait.getScreenCTM();
     const cursor = matrix ? new DOMPoint(pointer.x, pointer.y).matrixTransform(matrix.inverse()) : null;
@@ -69,7 +76,7 @@ if (portraitControl) {
     const running = visible && !document.hidden && !reduceMotion.matches;
     portrait.style.animationPlayState = running ? 'running' : 'paused';
     if (!running) { stop(); return; }
-    if (!frame) tick(performance.now());
+    if (!frame) { lastUpdate = -Infinity; tick(performance.now()); }
   };
   portraitControl.addEventListener('pointermove', event => {
     if (event.pointerType !== 'touch' && !reduceMotion.matches) pointer = {x: event.clientX, y: event.clientY};

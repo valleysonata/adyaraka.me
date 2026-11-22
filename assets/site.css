@@ -54,7 +54,7 @@ body:not(.home-page)>.wrap{padding-top:110px!important}
 .github-count{font-size:16px;color:#999;margin:0 0 23px;line-height:1.5}
 .github-count strong{color:#eee;font-weight:600}
 .github-scroll{overflow-x:auto;padding:0 0 8px;scrollbar-width:thin;scrollbar-color:#444 transparent}
-.github-calendar{min-width:680px;--gap:3px;--heat-0:#252525;--heat-1:#484848;--heat-2:#777;--heat-3:#acacac;--heat-4:#e5e5e5}
+.github-calendar{min-width:680px;--gap:3px;--heat-0:#161b22;--heat-1:#0e4429;--heat-2:#006d32;--heat-3:#26a641;--heat-4:#39d353}
 .github-months{display:grid;grid-template-columns:repeat(var(--weeks),minmax(0,1fr));gap:var(--gap);margin:0 0 7px 30px;color:#999;font-size:11px;line-height:1.5}
 .github-months span{white-space:nowrap}
 .github-body{display:flex;gap:8px}
