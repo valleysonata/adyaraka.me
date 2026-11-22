@@ -59,7 +59,8 @@ if (portraitControl) {
         const position = characters[row]?.[column];
         const distance = cursor && position ? Math.hypot(position.x - cursor.x, position.y - cursor.y) : Infinity;
         const localChance = Math.max(0, 1 - distance / radius);
-        return Math.random() < Math.max(baseChance, localChance) ? glyphs[Math.floor(Math.random() * glyphs.length)] : character;
+        const chance = 1 - (1 - baseChance) * (1 - localChance);
+        return Math.random() < chance ? glyphs[Math.floor(Math.random() * glyphs.length)] : character;
       }).join('');
     });
     frame = requestAnimationFrame(tick);
