@@ -28,88 +28,68 @@ if (portraitControl) {
   const originals = lines.map(line => line.textContent);
   const glyphs = '@%#*+=:.-';
   let frame = 0;
-  let hoverFrame = 0;
   let pointer = null;
   let characters = [];
+  let visible = true;
+  let clickStart = -Infinity;
   const resetText = () => {
-    lines.forEach((line, index) => { line.textContent = originals[index]; });
+    lines.forEach((line, row) => { line.textContent = originals[row]; });
   };
-  const stopHover = () => {
-    cancelAnimationFrame(hoverFrame);
-    hoverFrame = 0;
-    pointer = null;
-    if (!frame) resetText();
-  };
-  // Measure the original glyphs once; screen-to-SVG conversion keeps the radius
-  // aligned with the cursor at every responsive size and during portrait drift.
   const measureCharacters = () => {
-    if (frame || hoverFrame) return;
     characters = lines.map((line, row) => [...originals[row]].map((character, column) => {
       if (!character.trim()) return null;
       const box = line.getExtentOfChar(column);
       return {x: box.x + box.width / 2, y: box.y + box.height / 2};
     }));
   };
-  const restore = () => {
+  const stop = () => {
     cancelAnimationFrame(frame);
     frame = 0;
-    stopHover();
     resetText();
-    portrait.classList.remove('is-playing');
   };
-  const scramble = (clicked = false) => {
-    if (reduceMotion.matches || (!clicked && frame)) return;
-    restore();
-    if (clicked) portrait.classList.add('is-playing');
-    const start = performance.now();
-    const duration = clicked ? 850 : 520;
-    let lastUpdate = -50;
-    const tick = now => {
-      const elapsed = now - start;
-      if (elapsed >= duration) { restore(); return; }
-      if (elapsed - lastUpdate >= 45) {
-        const chance = .45 * (1 - elapsed / duration);
-        lines.forEach((line, index) => {
-          line.textContent = originals[index].replace(/\S/g, character =>
-            Math.random() < chance ? glyphs[Math.floor(Math.random() * glyphs.length)] : character);
-        });
-        lastUpdate = elapsed;
-      }
-      frame = requestAnimationFrame(tick);
-    };
-    tick(start);
-  };
-  const hover = now => {
-    if (!pointer || frame || reduceMotion.matches) { stopHover(); return; }
-    const matrix = portrait.getScreenCTM();
-    if (!matrix) { stopHover(); return; }
-    const cursor = new DOMPoint(pointer.x, pointer.y).matrixTransform(matrix.inverse());
-    const radius = 32;
+  const tick = now => {
+    // Fresh noise on every display frame, with the original silhouette intact.
+    const baseChance = now - clickStart < 120 ? .75 : .5;
+    const matrix = pointer && portrait.getScreenCTM();
+    const cursor = matrix ? new DOMPoint(pointer.x, pointer.y).matrixTransform(matrix.inverse()) : null;
+    const radius = 64;
     lines.forEach((line, row) => {
       line.textContent = [...originals[row]].map((character, column) => {
+        if (!character.trim()) return character;
         const position = characters[row]?.[column];
-        if (!position) return character;
-        const distance = Math.hypot(position.x - cursor.x, position.y - cursor.y);
-        if (distance >= radius) return character;
-        const strength = 1 - distance / radius;
-        const phase = Math.floor(now / 60) + row * 7 + column * 13;
-        return phase % 10 < Math.ceil(strength * 10) ? glyphs[phase % glyphs.length] : character;
+        const distance = cursor && position ? Math.hypot(position.x - cursor.x, position.y - cursor.y) : Infinity;
+        const localChance = Math.max(0, 1 - distance / radius);
+        return Math.random() < Math.max(baseChance, localChance) ? glyphs[Math.floor(Math.random() * glyphs.length)] : character;
       }).join('');
     });
-    hoverFrame = requestAnimationFrame(hover);
+    frame = requestAnimationFrame(tick);
+  };
+  const update = () => {
+    const running = visible && !document.hidden && !reduceMotion.matches;
+    portrait.style.animationPlayState = running ? 'running' : 'paused';
+    if (!running) { stop(); return; }
+    if (!frame) tick(performance.now());
   };
   portraitControl.addEventListener('pointermove', event => {
-    if (event.pointerType === 'touch' || frame || reduceMotion.matches) return;
-    if (!characters.length) measureCharacters();
-    pointer = {x: event.clientX, y: event.clientY};
-    if (!hoverFrame) hover(performance.now());
+    if (event.pointerType !== 'touch' && !reduceMotion.matches) pointer = {x: event.clientX, y: event.clientY};
   });
-  portraitControl.addEventListener('pointerleave', stopHover);
-  portraitControl.addEventListener('click', () => scramble(true));
-  document.fonts.ready.then(measureCharacters);
-  addEventListener('resize', () => { stopHover(); measureCharacters(); }, {passive: true});
-  addEventListener('pagehide', restore);
-  reduceMotion.addEventListener('change', restore);
+  portraitControl.addEventListener('pointerleave', () => { pointer = null; });
+  portraitControl.addEventListener('click', () => {
+    clickStart = performance.now();
+  });
+  document.fonts.ready.then(() => { measureCharacters(); update(); });
+  addEventListener('resize', measureCharacters, {passive: true});
+  document.addEventListener('visibilitychange', update);
+  addEventListener('pagehide', stop);
+  addEventListener('pageshow', update);
+  reduceMotion.addEventListener('change', update);
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      visible = entries[0].isIntersecting;
+      update();
+    });
+    observer.observe(portraitControl);
+  }
 }
 
 const nav = document.querySelector('.site-nav');
