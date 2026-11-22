@@ -1,5 +1,7 @@
 """Check shared navigation, homepage preservation and generated real-data integrity."""
+import argparse
 import json
+import urllib.request
 from html.parser import HTMLParser
 from pathlib import Path
 from sync_layout import PAGES, featured_projects
@@ -27,20 +29,28 @@ class Page(HTMLParser):
                 assert (ROOT/value.lstrip('/')).is_file(), value
 
 
-def check():
+def check(base_url=None):
+    def read(name):
+        if not base_url:
+            return (ROOT/name).read_text(encoding='utf-8')
+        route = '/' if name == 'index.html' else '/research/' if name == 'research/index.html' else '/'+name.removesuffix('.html') if name.endswith('.html') else '/'+name
+        with urllib.request.urlopen(base_url.rstrip('/')+route, timeout=30) as response:
+            assert response.status == 200, route
+            return response.read().decode('utf-8')
+
     social = ['https://github.com/valleysonata',
               'https://www.linkedin.com/in/adyaraka-banyu-langit-63456a317/',
               'https://www.researchgate.net/profile/Adyaraka-Banyu-Langit',
               'mailto:adyaraka.cs15@nycu.edu.tw']
     for name in PAGES:
-        source = (ROOT/name).read_text(encoding='utf-8')
+        source = read(name)
         page = Page(source)
         assert page.headers == 1, name
         assert all(link in page.links for link in ['/', '/about', '/projects', '/research/', '/news', *social]), name
         assert source.count('/assets/site.css') == 1
         assert source.count('/assets/site.js') == 1
         assert '<nav class="mac-nav' not in source
-    home = (ROOT/'index.html').read_text(encoding='utf-8')
+    home = read('index.html')
     assert 'open.spotify.com' not in home and 'np-embed' not in home
     assert '<h2 class="bio-header">Hi!</h2>' in home
     assert 'assets/ascii-art.svg' in home
@@ -48,7 +58,7 @@ def check():
     assert 'Computer Science @ NYCU' in home
     assert home.index('bio-header') < home.index('id="github-title"') < home.index('id="featured-title"') < home.index('<footer')
     assert featured_projects() in home
-    snapshot = json.loads((ROOT/'assets/github-contributions.json').read_text(encoding='utf-8'))
+    snapshot = json.loads(read('assets/github-contributions.json'))
     days = [day for week in snapshot['weeks'] for day in week['contributionDays']]
     rendered = Page(home).days
     assert len(rendered) == len(days)
@@ -56,8 +66,12 @@ def check():
     assert [cell['data-date'] for cell in rendered] == [day['date'] for day in days]
     assert sum(cell['tabindex'] == '0' for cell in rendered) == 1
     assert snapshot['source'] == 'https://api.github.com/graphql'
+    assert '.site-header' in read('assets/site.css')
+    assert 'github-calendar' in read('assets/site.js')
     print('PASS: six static headers and existing links; hero/ASCII preserved; Spotify absent; project reuse; real calendar snapshot/render integrity.')
 
 
 if __name__ == '__main__':
-    check()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--base-url')
+    check(parser.parse_args().base_url)
